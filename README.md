@@ -95,6 +95,15 @@ resource "github_membership" "$USER_NAME" {
 - Terraform
 - jq
 
+### Do it
+- `git clone` this repo
+- configure the variables at the top of the script
+  - GITHUB_TOKEN=''
+  - ORG=''
+- run the script
+- run a terraform plan to see that everything was imported and that no changes are required.
+  - some manual modifications _could_ be required since not every field supported by Terraform has been implemented by this script.
+
 # FAQ
 - Q) Why bash?
   - A) I like bash.
