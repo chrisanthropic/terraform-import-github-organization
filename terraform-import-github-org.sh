@@ -30,14 +30,26 @@ import_public_repos () {
   
       PUBLIC_REPO_DESCRIPTION=$(curl -s "https://api.github.com/repos/$ORG/$i?access_token=$GITHUB_TOKEN" | jq -r .description)
   
+      PUBLIC_REPO_DOWNLOADS=$(curl -s "https://api.github.com/repos/$ORG/$i?access_token=$GITHUB_TOKEN" | jq -r .has_downloads)
+      
+      PUBLIC_REPO_WIKI=$(curl -s "https://api.github.com/repos/$ORG/$i?access_token=$GITHUB_TOKEN" | jq -r .has_wiki)
+      
+      PUBLIC_REPO_ISSUES=$(curl -s "https://api.github.com/repos/$ORG/$i?access_token=$GITHUB_TOKEN" | jq -r .has_issues)
+     
+      # Terraform doesn't like '.' in resource names, so if one exists then replace it with a dash
+      TERRAFORM_PUBLIC_REPO_NAME=$(echo $i | tr  "."  "-")
+  
       # Import the Repo
-      terraform import github_repository.$i $i
+      terraform import github_repository.$TERRAFORM_PUBLIC_REPO_NAME $i
   
       cat >> github-public-repos.tf << EOF
-resource "github_repository" "$i" {
+resource "github_repository" "$TERRAFORM_PUBLIC_REPO_NAME" {
   name        = "$i"
   private     = false
   description = "$PUBLIC_REPO_DESCRIPTION"
+  has_wiki    = "$PUBLIC_REPO_WIKI"
+  has_downloads = "$PUBLIC_REPO_DOWNLOADS"
+  has_issues  = "$PUBLIC_REPO_ISSUES"
 }
 EOF
 
@@ -68,13 +80,13 @@ import_private_repos () {
       PRIVATE_REPO_ISSUES=$(curl -s "https://api.github.com/repos/$ORG/$i?access_token=$GITHUB_TOKEN" | jq -r .has_issues)
      
       # Terraform doesn't like '.' in resource names, so if one exists then replace it with a dash
-      TERRAFORM_REPO_NAME=$(echo $i | tr  "."  "-")
+      TERRAFORM_PRIVATE_REPO_NAME=$(echo $i | tr  "."  "-")
   
       # Import the Repo
-      terraform import github_repository.$TERRAFORM_REPO_NAME $i
+      terraform import github_repository.$TERRAFORM_PRIVATE_REPO_NAME $i
   
       cat >> github-private-repos.tf << EOF
-resource "github_repository" "$TERRAFORM_REPO_NAME" {
+resource "github_repository" "$TERRAFORM_PRIVATE_REPO_NAME" {
   name        = "$i"
   private     = true
   description = "$PRIVATE_REPO_DESCRIPTION"
