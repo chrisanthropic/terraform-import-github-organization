@@ -59,7 +59,7 @@ EOF
 
 # Private Repos
 get_private_pagination () {
-  curl -I "https://api.github.com/orgs/$ORG/repos?access_token=$GITHUB_TOKEN&type=public&per_page=100" | grep -o '&page=.*.' | grep -Eo '[0-9]*' | tail -1
+  curl -I "https://api.github.com/orgs/$ORG/repos?access_token=$GITHUB_TOKEN&type=private&per_page=100" | grep -o '&page=.*.' | grep -Eo '[0-9]*' | tail -1
 }
 
 limit_private_pagination () {
