@@ -28,8 +28,8 @@ import_public_repos () {
   
     for i in $(curl -s "https://api.github.com/orgs/$ORG/repos?access_token=$GITHUB_TOKEN&type=public&page=$PAGE&per_page=100" | jq -r 'sort_by(.name) | .[] | .name'); do
   
-      PUBLIC_REPO_DESCRIPTION=$(curl -s "https://api.github.com/repos/$ORG/$i?access_token=$GITHUB_TOKEN" | jq -r .description)
   
+      PUBLIC_REPO_DESCRIPTION=$(curl -s "https://api.github.com/repos/$ORG/$i?access_token=$GITHUB_TOKEN" | jq -r .description | sed "s/\"/'/g")
       PUBLIC_REPO_DOWNLOADS=$(curl -s "https://api.github.com/repos/$ORG/$i?access_token=$GITHUB_TOKEN" | jq -r .has_downloads)
       
       PUBLIC_REPO_WIKI=$(curl -s "https://api.github.com/repos/$ORG/$i?access_token=$GITHUB_TOKEN" | jq -r .has_wiki)
