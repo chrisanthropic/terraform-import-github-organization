@@ -15,7 +15,7 @@ ORG=''
   # You can only list 100 items per page, so you can only clone 100 at a time.
   # This function uses the API to calculate how many pages of public repos you have.
 get_public_pagination () {
-  curl -I "https://api.github.com/orgs/$ORG/repos?access_token=$GITHUB_TOKEN&type=public&per_page=100" | grep -o '&page=.*.' | grep -Eo '[0-9]*' | tail -1
+  curl -I "https://api.github.com/orgs/$ORG/repos?access_token=$GITHUB_TOKEN&type=public&per_page=100" | grep -Eo '&page=\d+' | grep -Eo '[0-9]+' | tail -1
 }
   # This function uses the output from above and creates an array counting from 1->$ 
 limit_public_pagination () {
@@ -59,7 +59,7 @@ EOF
 
 # Private Repos
 get_private_pagination () {
-  curl -I "https://api.github.com/orgs/$ORG/repos?access_token=$GITHUB_TOKEN&type=private&per_page=100" | grep -o '&page=.*.' | grep -Eo '[0-9]*' | tail -1
+  curl -I "https://api.github.com/orgs/$ORG/repos?access_token=$GITHUB_TOKEN&type=private&per_page=100" | grep -Eo '&page=\d+' | grep -Eo '[0-9]+' | tail -1
 }
 
 limit_private_pagination () {
@@ -182,7 +182,7 @@ EOF
 }
 
 get_team_pagination () {
-  curl -I "https://api.github.com/orgs/$ORG/repos?access_token=$GITHUB_TOKEN&per_page=100" | grep -o '&page=.*.' | grep -Eo '[0-9]*' | tail -1
+  curl -I "https://api.github.com/orgs/$ORG/repos?access_token=$GITHUB_TOKEN&per_page=100" | grep -Eo '&page=\d+' | grep -Eo '[0-9]+' | tail -1
 }
   # This function uses the out from above and creates an array counting from 1->$ 
 limit_team_pagination () {
