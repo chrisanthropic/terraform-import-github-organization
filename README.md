@@ -91,7 +91,6 @@ resource "github_membership" "$USER_NAME" {
 - A github [personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) with the following permissions:
   - repo (all)
   - admin:org (all)
-  - delete_repo
 - Terraform
 - jq
 
