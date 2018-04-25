@@ -91,18 +91,42 @@ resource "github_membership" "$USER_NAME" {
 - A github [personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) with the following permissions:
   - repo (all)
   - admin:org (all)
-  - delete_repo
 - Terraform
 - jq
 
 ### Do it
 - `git clone` this repo
+- create a basic terraform configuration file, e.g. `main.tf` with
+  something like:
+
+  ```hcl
+  provider "github" {
+    token        = "TOKENGOESHERE"
+    organization = "my_org"
+    # optional, if using GitHub Enterprise
+    base_url     =  "https://github.mycompany.com/api/v3/"
+  }
+  ```
+- run `terraform init` to e.g. install the GitHub provider
 - configure the variables at the top of the script
-  - GITHUB_TOKEN=''
-  - ORG=''
-- run the script
+  - `GITHUB_TOKEN=...`
+  - `ORG=...`
+  - if you're using GitHub Enterprise, `API_URL_PREFIX=...`
+  or remember to pass them in via the environment
+- run the scriptm, perhaps passing the necessary environment variables
+  ```
+  GITHUB_TOKEN=12334...4555 ORG=my_org terraform-import-github-org.sh
+  ```
 - run a terraform plan to see that everything was imported and that no changes are required.
   - some manual modifications _could_ be required since not every field supported by Terraform has been implemented by this script.
+  - HEADS UP - the script hardcodes user roles to "member".
+
+### Using with GitHub Enterprise
+
+This should also work with GitHub Enterprise deployments if you also
+set (either editing the script or via an environment variable) the
+`API_URL_PREFIX` correctly,
+e.g. `https://github.mycompany.com/api/v3`.
 
 # FAQ
 - Q) Why bash?
