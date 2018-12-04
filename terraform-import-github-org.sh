@@ -6,7 +6,7 @@
 ###
 GITHUB_TOKEN=${GITHUB_TOKEN:-''}
 ORG=${ORG:-''}
-API_URL_PREFIX=${API_URL_PREFIX:-'https://github.com'}
+API_URL_PREFIX=${API_URL_PREFIX:-'https://api.github.com'}
 
 ###
 ## FUNCTIONS
