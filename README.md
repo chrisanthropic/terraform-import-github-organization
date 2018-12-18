@@ -15,7 +15,7 @@ I like managing things with Terraform. Sometimes those things were created befor
 # HOW
 ## How the script works
 ### Public repos
-Imports all public repos owned by the organization (includes full pagination support for Orgs with 100+ repos). Also writes a Terraform resource block in a single file (`gihtub-public-repos.tf`), using the following template and populating it with values pulled via the Github API:
+Imports all public repos owned by the organization (includes full pagination support for Orgs with 100+ repos). Also writes a Terraform resource block in a single file (`github-public-repos.tf`), using the following template and populating it with values pulled via the Github API:
 
 ```
 resource "github_repository" "$PUBLIC_REPO_NAME" {
@@ -29,7 +29,7 @@ resource "github_repository" "$PUBLIC_REPO_NAME" {
 ```
 
 ### Private repos
-Imports all private repos owned by the organization (includes full pagination support for Orgs with 100+ repos). Also writes a Terraform resource block in a single file (`gihtub-private-repos.tf`), using the following template and populating it with values pulled via the Github API:
+Imports all private repos owned by the organization (includes full pagination support for Orgs with 100+ repos). Also writes a Terraform resource block in a single file (`github-private-repos.tf`), using the following template and populating it with values pulled via the Github API:
 
 ```
 resource "github_repository" "$PRIVATE_REPO_NAME" {
@@ -43,7 +43,7 @@ resource "github_repository" "$PRIVATE_REPO_NAME" {
 ```
 
 ### Team repos
-Imports all team repos owned by the organization (includes full pagination support for Orgs with 100+ repos). Also writes a Terraform resource block in a unique file per team (`gihtub-teams-$TEAM_NAME.tf`), using the following template and populating it with values pulled via the Github API:
+Imports all team repos owned by the organization (includes full pagination support for Orgs with 100+ repos). Also writes a Terraform resource block in a unique file per team (`github-teams-$TEAM_NAME.tf`), using the following template and populating it with values pulled via the Github API:
 
 ```
 resource "github_team_repository" "$TEAM_NAME-$TERRAFORM_TEAM_REPO_NAME" {
@@ -54,7 +54,7 @@ resource "github_team_repository" "$TEAM_NAME-$TERRAFORM_TEAM_REPO_NAME" {
 ```
 
 ### Teams
-Imports all teams belonging to the organization. Also writes a Terraform resource block in a unique file per team (`gihtub-teams-$TEAM_NAME.tf`), using the following template and populating it with values pulled via the Github API:
+Imports all teams belonging to the organization. Also writes a Terraform resource block in a unique file per team (`github-teams-$TEAM_NAME.tf`), using the following template and populating it with values pulled via the Github API:
 
 ```
 resource "github_team" "$TEAM_NAME" {
@@ -65,7 +65,7 @@ resource "github_team" "$TEAM_NAME" {
 ```
 
 ### Team memberships
-Imports the team membership for all teams owned by the organization (what users belong to what teams). Also writes a Terraform resource block in a unique file per team (`gihtub-team-memberships-$TEAM_NAME.tf`), using the following template and populating it with values pulled via the Github API:
+Imports the team membership for all teams owned by the organization (what users belong to what teams). Also writes a Terraform resource block in a unique file per team (`github-team-memberships-$TEAM_NAME.tf`), using the following template and populating it with values pulled via the Github API:
 
 ```
 resource "github_team_membership" "$TEAM_NAME-$USER_NAME" {
@@ -76,7 +76,7 @@ resource "github_team_membership" "$TEAM_NAME-$USER_NAME" {
 ```
 
 ### Organization users
-Imports all users belonging to the organization. Also writes a Terraform resource block in a single file (`gihtub-users.tf`), using the following template and populating it with values pulled via the Github API:
+Imports all users belonging to the organization. Also writes a Terraform resource block in a single file (`github-users.tf`), using the following template and populating it with values pulled via the Github API:
 
 ```
 resource "github_membership" "$USER_NAME" {
