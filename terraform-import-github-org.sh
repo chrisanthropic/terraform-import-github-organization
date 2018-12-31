@@ -120,22 +120,23 @@ import_teams () {
   for i in $(curl -s "${API_URL_PREFIX}/orgs/${ORG}/teams?access_token=${GITHUB_TOKEN}&per_page=100" -H "Accept: application/vnd.github.hellcat-preview+json" | jq -r 'sort_by(.name) | .[] | .id'); do
   
     TEAM_NAME=$(curl -s "${API_URL_PREFIX}/teams/${i}?access_token=${GITHUB_TOKEN}&per_page=100" -H "Accept: application/vnd.github.hellcat-preview+json" | jq -r .name)
+    TEAM_NAME_NO_SPACE=`echo $TEAM_NAME | tr " " "_"`
 
     TEAM_PRIVACY=$(curl -s "${API_URL_PREFIX}/teams/${i}?access_token=${GITHUB_TOKEN}&per_page=100" -H "Accept: application/vnd.github.hellcat-preview+json" | jq -r .privacy)
   
     TEAM_DESCRIPTION=$(curl -s "${API_URL_PREFIX}/teams/${i}?access_token=${GITHUB_TOKEN}&per_page=100" -H "Accept: application/vnd.github.hellcat-preview+json" | jq -r .description)
   
     if [[ "${TEAM_PRIVACY}" == "closed" ]]; then
-      cat >> "github-teams-${TEAM_NAME}.tf" << EOF
-resource "github_team" "${TEAM_NAME}" {
+      cat >> "github-teams-${TEAM_NAME_NO_SPACE}.tf" << EOF
+resource "github_team" "${TEAM_NAME_NO_SPACE}" {
   name        = "${TEAM_NAME}"
   description = "${TEAM_DESCRIPTION}"
   privacy     = "closed"
 }
 EOF
     elif [[ "${TEAM_PRIVACY}" == "secret" ]]; then
-      cat >> "github-teams-${TEAM_NAME}.tf" << EOF
-resource "github_team" "${TEAM_NAME}" {
+      cat >> "github-teams-${TEAM_NAME_NO_SPACE}.tf" << EOF
+resource "github_team" "${TEAM_NAME_NO_SPACE}" {
   name        = "${TEAM_NAME}"
   description = "${TEAM_DESCRIPTION}"
   privacy     = "secret"
@@ -143,7 +144,7 @@ resource "github_team" "${TEAM_NAME}" {
 EOF
     fi
 
-    terraform import "github_team.${TEAM_NAME}" "${i}"
+    terraform import "github_team.${TEAM_NAME_NO_SPACE}" "${i}"
   done
 }
 
@@ -151,7 +152,7 @@ EOF
 import_team_memberships () {
   for i in $(curl -s "${API_URL_PREFIX}/orgs/${ORG}/teams?access_token=${GITHUB_TOKEN}&per_page=100" -H "Accept: application/vnd.github.hellcat-preview+json" | jq -r 'sort_by(.name) | .[] | .id'); do
   
-  TEAM_NAME=$(curl -s "${API_URL_PREFIX}/teams/${i}?access_token=${GITHUB_TOKEN}&per_page=100" -H "Accept: application/vnd.github.hellcat-preview+json" | jq -r .name)
+  TEAM_NAME=$(curl -s "${API_URL_PREFIX}/teams/${i}?access_token=${GITHUB_TOKEN}&per_page=100" -H "Accept: application/vnd.github.hellcat-preview+json" | jq -r .name | tr " " "_")
   
     for j in $(curl -s "${API_URL_PREFIX}/teams/${i}/members?access_token=${GITHUB_TOKEN}&per_page=100" -H "Accept: application/vnd.github.hellcat-preview+json" | jq -r .[].login); do
     
@@ -198,7 +199,7 @@ get_team_repos () {
     for i in $(curl -s "${API_URL_PREFIX}/teams/${TEAM_ID}/repos?access_token=${GITHUB_TOKEN}&page=${PAGE}&per_page=100" | jq -r 'sort_by(.name) | .[] | .name'); do
     
     TERRAFORM_TEAM_REPO_NAME=$(echo "${i}" | tr  "."  "-")
-    TEAM_NAME=$(curl -s "${API_URL_PREFIX}/teams/${TEAM_ID}?access_token=${GITHUB_TOKEN}" | jq -r .name)
+    TEAM_NAME=$(curl -s "${API_URL_PREFIX}/teams/${TEAM_ID}?access_token=${GITHUB_TOKEN}" | jq -r .name | tr " " "_")
 
     ADMIN_PERMS=$(curl -s "${API_URL_PREFIX}/teams/${TEAM_ID}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3.repository+json" | jq -r .permissions.admin )
     PUSH_PERMS=$(curl -s "${API_URL_PREFIX}/teams/${TEAM_ID}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3.repository+json" | jq -r .permissions.push )
