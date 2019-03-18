@@ -37,6 +37,8 @@ import_public_repos () {
       PUBLIC_REPO_WIKI=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .has_wiki)
       
       PUBLIC_REPO_ISSUES=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .has_issues)
+      
+      PUBLIC_REPO_ARCHIVED=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .archived)
      
       # Terraform doesn't like '.' in resource names, so if one exists then replace it with a dash
       TERRAFORM_PUBLIC_REPO_NAME=$(echo "${i}" | tr  "."  "-")
@@ -49,6 +51,7 @@ resource "github_repository" "${TERRAFORM_PUBLIC_REPO_NAME}" {
   has_wiki    = "${PUBLIC_REPO_WIKI}"
   has_downloads = "${PUBLIC_REPO_DOWNLOADS}"
   has_issues  = "${PUBLIC_REPO_ISSUES}"
+  archived    = "${PUBLIC_REPO_ARCHIVED}"
 }
 EOF
 
@@ -80,6 +83,8 @@ import_private_repos () {
       PRIVATE_REPO_WIKI=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .has_wiki)
       
       PRIVATE_REPO_ISSUES=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .has_issues)
+      
+      PRIVATE_REPO_ARCHIVED=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .archived)
      
       # Terraform doesn't like '.' in resource names, so if one exists then replace it with a dash
       TERRAFORM_PRIVATE_REPO_NAME=$(echo "${i}" | tr  "."  "-")
@@ -92,6 +97,7 @@ resource "github_repository" "${TERRAFORM_PRIVATE_REPO_NAME}" {
   has_wiki    = "${PRIVATE_REPO_WIKI}"
   has_downloads = "${PRIVATE_REPO_DOWNLOADS}"
   has_issues  = "${PRIVATE_REPO_ISSUES}"
+  archived    = "${PRIVATE_REPO_ARCHIVED}"
 }
 
 EOF
