@@ -16,7 +16,7 @@ API_URL_PREFIX=${API_URL_PREFIX:-'https://api.github.com'}
   # You can only list 100 items per page, so you can only clone 100 at a time.
   # This function uses the API to calculate how many pages of public repos you have.
 get_public_pagination () {
-    public_pages=$(curl -I "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=public&per_page=100" | grep -Eo '&page=\d+' | grep -Eo '[0-9]+' | tail -1;)
+    public_pages=$(curl -I "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=public&per_page=100" | grep -Eo '&page=[0-9]+' | grep -Eo '[0-9]+' | tail -1;)
     echo "${public_pages:-1}"
 }
   # This function uses the output from above and creates an array counting from 1->$ 
@@ -28,7 +28,7 @@ limit_public_pagination () {
 import_public_repos () {
   for PAGE in $(limit_public_pagination); do
   
-    for i in $(curl -s "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=public&page=${PAGE}&per_page=100" | jq -r 'sort_by(.name) | .[] | .name'); do
+    for i in $(curl -s "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=public&page=${PAGE}&per_page=100&sort=full_name" | jq -r 'sort_by(.name) | .[] | .name'); do
   
   
       PUBLIC_REPO_DESCRIPTION=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .description | sed "s/\"/'/g")
@@ -63,7 +63,7 @@ EOF
 
 # Private Repos
 get_private_pagination () {
-    priv_pages=$(curl -I "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=private&per_page=100" | grep -Eo '&page=\d+' | grep -Eo '[0-9]+' | tail -1;)
+    priv_pages=$(curl -I "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=private&per_page=100" | grep -Eo '&page=[0-9]+' | grep -Eo '[0-9]+' | tail -1;)
     echo "${priv_pages:-1}"
 }
 
@@ -74,7 +74,7 @@ limit_private_pagination () {
 import_private_repos () {
   for PAGE in $(limit_private_pagination); do
 
-    for i in $(curl -s "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=private&page=${PAGE}&per_page=100" | jq -r 'sort_by(.name) | .[] | .name'); do
+    for i in $(curl -s "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=private&page=${PAGE}&per_page=100&sort=full_name" | jq -r 'sort_by(.name) | .[] | .name'); do
   
       PRIVATE_REPO_DESCRIPTION=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .description | sed "s/\"/'/g")
       
