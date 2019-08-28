@@ -48,6 +48,7 @@ import_public_repos () {
      
       # Terraform doesn't like '.' in resource names, so if one exists then replace it with a dash
       TERRAFORM_PUBLIC_REPO_NAME=$(echo "${i}" | tr  "."  "-")
+      import_repos_protected_branches
 
       cat >> github-public-repos.tf << EOF
 resource "github_repository" "${TERRAFORM_PUBLIC_REPO_NAME}" {
@@ -157,8 +158,7 @@ EOF
 # Teams
 import_teams () {
   for i in $(curl -s "${API_URL_PREFIX}/orgs/${ORG}/teams?access_token=${GITHUB_TOKEN}&per_page=100" -H "Accept: application/vnd.github.hellcat-preview+json" | jq -r 'sort_by(.name) | .[] | .id'); do
-    TEAM_PAYLOAD=$(curl -s "${API_URL_PREFIX}/teams/${i}?access_token=${GITHUB_TOKEN}&per_page=100" -H "Accept: application/vnd.github.hellcat-preview+json")
-
+  
     TEAM_NAME=$(echo "$TEAM_PAYLOAD" | jq -r .name)
     TEAM_NAME_NO_SPACE=`echo $TEAM_NAME | tr " " "_" | tr "/" "_"`
     TEAM_PRIVACY=$(echo "$TEAM_PAYLOAD" | jq -r .privacy)
@@ -286,12 +286,18 @@ for TEAM_ID in $(get_team_ids); do
 done
 }
 
+import_all_team_resources () {
+  import_teams
+  import_team_memberships
+  import_team_repos
+}
+
 ###
 ## DO IT YO
 ###
 import_public_repos
+# import_repos_protected_branches
+# to test set the vars that you need here and then call the function so you can. 
 import_private_repos
 import_users
-import_teams
-import_team_memberships
-import_team_repos
+import_all_team_resources
