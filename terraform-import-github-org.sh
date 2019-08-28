@@ -28,12 +28,7 @@ limit_public_pagination () {
 import_public_repos () {
   for PAGE in $(limit_public_pagination); do
   
-<<<<<<< HEAD
-    for i in $(curl -s "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=public&page=${PAGE}&per_page=100" | jq -r 'sort_by(.name) | .[] | .name'); do
-      PUBLIC_REPO_PAYLOAD=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" -H "Accept: application/vnd.github.mercy-preview+json")
-=======
     for i in $(curl -s "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=public&page=${PAGE}&per_page=100&sort=full_name" | jq -r 'sort_by(.name) | .[] | .name'); do
->>>>>>> patch-2/patch-2
   
       PUBLIC_REPO_DESCRIPTION=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r '.description | select(type == "string")' | sed "s/\"/'/g")
       PUBLIC_REPO_DOWNLOADS=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r .has_downloads)
@@ -94,7 +89,6 @@ limit_private_pagination () {
 import_private_repos () {
   for PAGE in $(limit_private_pagination); do
 
-<<<<<<< HEAD
     for i in $(curl -s "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=private&page=${PAGE}&per_page=100" | jq -r 'sort_by(.name) | .[] | .name'); do
       PRIVATE_REPO_PAYLOAD=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" -H "Accept: application/vnd.github.mercy-preview+json")
 
@@ -113,19 +107,6 @@ import_private_repos () {
       PRIVATE_REPO_GITIGNORE_TEMPLATE=$(echo "$PRIVATE_REPO_PAYLOAD" | jq -r .gitignore_template)
       PRIVATE_REPO_LICENSE_TEMPLATE=$(echo "$PRIVATE_REPO_PAYLOAD" | jq -r '.license_template | select(type == "string")')
       PRIVATE_REPO_HOMEPAGE_URL=$(echo "$PRIVATE_REPO_PAYLOAD" | jq -r '.homepage | select(type == "string")')
-=======
-    for i in $(curl -s "${API_URL_PREFIX}/orgs/${ORG}/repos?access_token=${GITHUB_TOKEN}&type=private&page=${PAGE}&per_page=100&sort=full_name" | jq -r 'sort_by(.name) | .[] | .name'); do
-  
-      PRIVATE_REPO_DESCRIPTION=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .description | sed "s/\"/'/g")
-      
-      PRIVATE_REPO_DOWNLOADS=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .has_downloads)
-      
-      PRIVATE_REPO_WIKI=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .has_wiki)
-      
-      PRIVATE_REPO_ISSUES=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .has_issues)
-      
-      PRIVATE_REPO_ARCHIVED=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}" | jq -r .archived)
->>>>>>> patch-2/patch-2
      
       # Terraform doesn't like '.' in resource names, so if one exists then replace it with a dash
       TERRAFORM_PRIVATE_REPO_NAME=$(echo "${i}" | tr  "."  "-")
