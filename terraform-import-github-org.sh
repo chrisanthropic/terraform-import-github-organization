@@ -31,6 +31,7 @@ import_public_repos () {
       
       #avoid abusing the github api and reread the file from memory cache
       PUBLIC_REPO_PAYLOAD=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}?access_token=${GITHUB_TOKEN}&" -H "Accept: application/vnd.github.mercy-preview+json")
+
       PUBLIC_REPO_DESCRIPTION=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r '.description | select(type == "string")' | sed "s/\"/'/g")
       PUBLIC_REPO_DOWNLOADS=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r .has_downloads)
       PUBLIC_REPO_WIKI=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r .has_wiki)
@@ -49,7 +50,6 @@ import_public_repos () {
      
       # Terraform doesn't like '.' in resource names, so if one exists then replace it with a dash
       TERRAFORM_PUBLIC_REPO_NAME=$(echo "${i}" | tr  "."  "-")
-      import_repos_protected_branches
 
       cat >> github-public-repos.tf << EOF
 resource "github_repository" "${TERRAFORM_PUBLIC_REPO_NAME}" {
@@ -73,7 +73,10 @@ resource "github_repository" "${TERRAFORM_PUBLIC_REPO_NAME}" {
 EOF
 
       # Import the Repo
-      terraform import "github_repository.${TERRAFORM_PUBLIC_REPO_NAME}" "${i}"
+      #terraform import "github_repository.${TERRAFORM_PUBLIC_REPO_NAME}" "${i}"
+
+      # Import function to make ${i} repo names available to it
+      import_repos_protected_branches
     done
   done
 echo "~~~Completed with Public Repos~~~"  
@@ -83,14 +86,29 @@ import_repos_protected_branches () {
 # debug
 #set -x
 
+PROTECTED_BRANCH=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}/branches?access_token=${GITHUB_TOKEN}&protected=true" | jq -r 'sort_by(.name) | .[] | .name')
+
+  for protected_branch in ${PROTECTED_BRANCH}; do
+
+      #avoid abusing the github api and reread the file from memory cache     
       PROTECTION_BRANCH_PAYLOAD=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${PROTECTED_BRANCH}/branches?access_token=${GITHUB_TOKEN}&" -H "Accept: application/vnd.github.mercy-preview+json")
 
       PUBLIC_REPO_DOWNLOADS=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r .has_downloads)
       PUBLIC_REPO_WIKI=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r .has_wiki)
+      REPO_PROTECTION_PAYLOAD=$(curl -s "${API_URL_PREFIX}/repos/${ORG}/${i}/branches?access_token=${GITHUB_TOKEN}&" -H "Accept: application/vnd.github.mercy-preview+json")
+      PROTECTED_BRANCH_ENFORCE_ADMINS=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r .enforce_admins.enabled)     
+      PROTECTED_BRANCH_REQUIRED_STATUS_CHECKS_STRICT=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r '.required_status_checks.strict')
+      PROTECTED_BRANCH_REQUIRED_STATUS_CHECKS_CONTEXTS=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r '.required_status_checks.contexts')
+      PROTECTED_BRANCH_REQUIRED_PULL_REQUEST_REVIEWS_USERS=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r '.required_pull_request_reviews.users[]?.login')
       PROTECTED_BRANCH_REQUIRED_PULL_REQUEST_REVIEWS_TEAMS=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r '.required_pull_request_reviews.team[]?.slug')
       PROTECTED_BRANCH_RESTRICTIONS_USERS=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r '.restrictions.users[]?.login')
+      PROTECTED_BRANCH_RESTRICTIONS_TEAMS=$(echo "$PUBLIC_REPO_PAYLOAD" | jq -r '.restrictions.teams[]?.slug') 
 
       # convert bash arrays into csv list
+      PROTECTED_BRANCH_RESTRICTIONS_USERS_LIST=$(echo "${PROTECTED_BRANCH_RESTRICTIONS_USERS}" | tr  " "  ", ")
+      PROTECTED_BRANCH_RESTRICTIONS_TEAMS_LIST=$(echo "${PROTECTED_BRANCH_RESTRICTIONS_TEAMS}" | tr  " "  ", ")
+      PROTECTED_BRANCH_REQUIRED_PULL_REQUEST_REVIEWS_USERS_LIST=$(echo "${PROTECTED_BRANCH_REQUIRED_PULL_REQUEST_REVIEWS_USERS}" | tr  " "  ", ")
+      PROTECTED_BRANCH_REQUIRED_PULL_REQUEST_REVIEWS_TEAMS_LIST=$(echo "${PROTECTED_BRANCH_REQUIRED_PULL_REQUEST_REVIEWS_TEAMS}" | tr  " "  ", ")
 
 
       # write to terraform file
